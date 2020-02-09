@@ -1,0 +1,36 @@
+plugins {
+	id 'org.jetbrains.kotlin.jvm' version '1.3.61'
+}
+
+group 'com.soywiz.korlibs-api'
+version '1.0-SNAPSHOT'
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	jcenter()
+}
+
+dependencies {
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+	//implementation "mysql:mysql-connector-java:8.0.19"
+	implementation 'org.freemarker:freemarker:2.3.29'
+	implementation 'io.vertx:vertx-web:3.8.5'
+	implementation 'io.vertx:vertx-lang-kotlin:3.8.5'
+	implementation 'io.vertx:vertx-lang-kotlin-coroutines:3.8.5'
+	implementation 'com.soywiz.korlibs.korio:korio-jvm:1.9.8'
+	implementation "com.soywiz.kminiorm:kminiorm:0.2.1"
+	implementation "com.soywiz.kminiorm:kminiorm-jdbc:0.2.1"
+	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.10.2"
+	implementation "org.yaml:snakeyaml:1.25"
+	testImplementation "junit:junit:4.13"
+	testImplementation "org.jetbrains.kotlin:kotlin-test"
+	testImplementation "org.jetbrains.kotlin:kotlin-test-junit"
+}
+
+compileKotlin {
+	kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+	kotlinOptions.jvmTarget = "1.8"
+}
