@@ -47,9 +47,22 @@ task fatJar(type: Jar) {
 	manifest {
 		attributes 'Main-Class': 'com.soywiz.korlibs.api.MainKt'
 	}
-	baseName = 'all-in-one-jar'
+	archiveBaseName.set('app')
+	archiveVersion.set("")
 	from {
 		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
 	}
 	with jar
+}
+
+task publish(dependsOn: fatJar) {
+	doLast {
+		def jarFile = fatJar.outputs.files.first()
+		def server = "soywiz"
+		def baseDir = "/home/virtual/korlibs/korlibs-api.soywiz.com"
+		def baseOut = "$server:$baseDir"
+		exec { commandLine "scp", file("docker-compose.yml"), "$baseOut/docker-compose.yml" }
+		exec { commandLine "scp", jarFile, "$baseOut/app/" }
+		exec { commandLine "ssh", server, "/bin/bash", "-c", "'cd $baseDir; docker-compose restart'" }
+	}
 }
