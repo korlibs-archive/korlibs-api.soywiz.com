@@ -1,5 +1,6 @@
 package com.soywiz.korlibs.api.util
 
+/*
 import io.vertx.core.http.*
 import io.vertx.ext.web.*
 import kotlinx.coroutines.*
@@ -36,3 +37,4 @@ class Json(val obj: Any?) : IResponse {
 	override val contentType: String = "application/json"
 	override fun toString(): String = str
 }
+*/

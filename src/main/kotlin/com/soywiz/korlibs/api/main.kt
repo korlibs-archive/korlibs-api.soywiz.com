@@ -1,98 +1,38 @@
 package com.soywiz.korlibs.api
 
-import com.soywiz.korio.net.http.HttpClient
 import com.soywiz.korlibs.api.util.*
-import io.vertx.core.*
-import io.vertx.core.buffer.*
-import io.vertx.core.http.*
-import io.vertx.core.streams.*
-import io.vertx.ext.web.*
-import io.vertx.ext.web.handler.*
-import io.vertx.kotlin.coroutines.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.*
-import java.io.*
-import java.net.*
-import kotlin.coroutines.*
+import io.ktor.application.*
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.features.*
+import io.ktor.http.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 
-suspend fun main() {
-	val templates = TemplateEngine(File("src/main/resources"))
-	val vertx = Vertx.vertx()
-	val router = Router.router(vertx)
-	val httpClient = HttpClient()
-	router.apply {
-		//route("/") {
-		//templates.renderTemplate("template.ftl", mapOf("model" to MyModel()))
-		//}
-		router.route().handler(
-			CorsHandler.create("*")
-				.allowedHeaders(hashSetOf(
-					"x-requested-with", "Access-Control-Allow-Origin", "origin",
-					"Content-Type", "accept", "X-PINGARUNER"
-				))
-				.allowedMethods(setOf(
-					HttpMethod.GET, HttpMethod.POST, HttpMethod.OPTIONS, HttpMethod.DELETE, HttpMethod.PATCH, HttpMethod.PUT
-				))
-		);
-
-		route("/versions/:id") {
-			val id = this.pathParam("id").takeIf { it.matches(Regex("^[\\w+-]+$")) } ?: error("Invalid id")
-			val json = withContext(Dispatchers.IO) {
-				URL("https://api.bintray.com/packages/korlibs/korlibs/$id?attribute_values=1").readText()
-			}.fromJsonUntyped() as Map<String, Any?>
-			//val str = httpClient.readJson("https://api.bintray.com/packages/korlibs/korlibs/$id?attribute_values=1")
-
-			Json(mapOf("project" to id, "version" to json["latest_version"]))
+fun main() {
+	embeddedServer(Netty, port = 8080) {
+		install(DefaultHeaders)
+		install(CallLogging)
+		install(CORS) {
+			method(HttpMethod.Get)
+			method(HttpMethod.Post)
+			method(HttpMethod.Put)
+			method(HttpMethod.Patch)
+			method(HttpMethod.Options)
+			method(HttpMethod.Delete)
+			anyHost()
+			allowCredentials = true
 		}
-	}
-
-	println("Listening...8080")
-	vertx.createHttpServer().requestHandler(router).listen(8080)
-	Unit
-}
-
-suspend fun HttpClientResponse.readBytes(): ByteArray {
-	val buf = Buffer.buffer()
-	this.bodyHandler {
-		buf.appendBuffer(it)
-	}
-	return buf.bytes
-}
-
-suspend fun HttpClientRequest.getResponse(vertx: Vertx): HttpClientResponse {
-	val channel = toChannel2(vertx)
-	val response = channel.receive()
-	channel.close()
-	return response
-}
-
-fun <T> ReadStream<T>.toChannel2(vertx: Vertx): Channel<T> {
-	this.pause()
-	val ret = ChannelReadStream(
-		stream = this,
-		channel = Channel(0),
-		context = vertx.orCreateContext
-	)
-	ret.subscribe()
-	this.fetch(1)
-	return ret.channel
-}
-
-private class ChannelReadStream<T>(val stream: ReadStream<T>, val channel: Channel<T>, context: Context) : Channel<T> by channel, CoroutineScope {
-
-	override val coroutineContext: CoroutineContext = context.dispatcher()
-	fun subscribe() {
-		stream.endHandler {
-			close()
-		}
-		stream.exceptionHandler { err ->
-			close(err)
-		}
-		stream.handler { event ->
-			launch {
-				send(event)
-				stream.fetch(1)
+		val httpClient = HttpClient()
+		routing {
+			get("/versions/{id}") {
+				val id = context.parameters["id"].takeIf { (it ?: "").matches(Regex("^[\\w+-]+$")) } ?: error("Invalid id")
+				val str = httpClient.get<String>("https://api.bintray.com/packages/korlibs/korlibs/$id?attribute_values=1")
+				val json = str.fromJsonUntyped() as Map<String, Any?>
+				call.respond(mapOf("project" to id, "version" to json["latest_version"]).toJson())
 			}
 		}
-	}
+	}.start(wait = true)
 }
