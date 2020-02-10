@@ -141,11 +141,12 @@ fun main() {
 						for ((project, notifs) in slackChannelNotifications.findAll().groupBy { it.project }) {
 							try {
 								val version = getLibraryVersion(project)
+								println("  - Checking $project...$version")
 								for (notif in notifs) {
 									try {
 										if (version != notif.latestPublishedVersion) {
 											val msg = "Released `${version}` of `${notif.project}`"
-											println("msg: $msg")
+											println("     - $msg")
 											slackChannelNotifications.update(
 												Partial(
 													SlackChannelNotification::latestPublishedVersion to version
