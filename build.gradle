@@ -20,14 +20,18 @@ dependencies {
 	implementation 'io.vertx:vertx-lang-kotlin:3.8.5'
 	implementation 'io.vertx:vertx-lang-kotlin-coroutines:3.8.5'
 	*/
+	implementation "com.hubspot.slack:slack-client:1.6"
 	implementation 'io.ktor:ktor-server-netty:1.3.0'
 	implementation 'io.ktor:ktor-client-core-jvm:1.3.0'
 	implementation 'io.ktor:ktor-client-okhttp:1.3.0'
+	implementation 'io.ktor:ktor-client-jackson:1.3.0'
 	//implementation 'com.soywiz.korlibs.korio:korio-jvm:1.9.8'
+	implementation 'com.soywiz.korlibs.klock:klock-jvm:1.8.7'
 	implementation "com.soywiz.kminiorm:kminiorm:0.2.1"
 	implementation "com.soywiz.kminiorm:kminiorm-jdbc:0.2.1"
 	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.10.2"
 	implementation "org.yaml:snakeyaml:1.25"
+	implementation "com.h2database:h2:1.4.199"
 	testImplementation "junit:junit:4.13"
 	testImplementation "org.jetbrains.kotlin:kotlin-test"
 	testImplementation "org.jetbrains.kotlin:kotlin-test-junit"
@@ -55,14 +59,29 @@ task fatJar(type: Jar) {
 	with jar
 }
 
-task publish(dependsOn: fatJar) {
+def jarFile = fatJar.outputs.files.first()
+def server = "soywiz"
+def baseDir = "/home/virtual/korlibs/korlibs-api.soywiz.com"
+def baseOut = "$server:$baseDir"
+
+task publishDockerCompose() {
 	doLast {
-		def jarFile = fatJar.outputs.files.first()
-		def server = "soywiz"
-		def baseDir = "/home/virtual/korlibs/korlibs-api.soywiz.com"
-		def baseOut = "$server:$baseDir"
 		exec { commandLine "scp", file("docker-compose.yml"), "$baseOut/docker-compose.yml" }
+	}
+}
+
+task publishFatJar(dependsOn: fatJar) {
+	doLast {
 		exec { commandLine "scp", jarFile, "$baseOut/app/" }
+	}
+}
+
+task restartDockerCompose(dependsOn: fatJar) {
+	doLast {
 		exec { commandLine "ssh", server, "/bin/bash", "-c", "'cd $baseDir; docker-compose restart'" }
 	}
+}
+
+task publish(dependsOn: [publishDockerCompose, publishFatJar]) {
+	finalizedBy(restartDockerCompose)
 }
