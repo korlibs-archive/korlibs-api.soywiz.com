@@ -137,18 +137,26 @@ fun main() {
 			launch {
 				while (true) {
 					for ((project, notifs) in slackChannelNotifications.findAll().groupBy { it.project }) {
-						val version = getLibraryVersion(project)
-						for (notif in notifs) {
-							if (version != notif.latestPublishedVersion) {
-								slackChannelNotifications.update(
-									Partial(
-										SlackChannelNotification::latestPublishedVersion to version
-									)
-								) {
-									SlackChannelNotification::_id eq notif._id
+						try {
+							val version = getLibraryVersion(project)
+							for (notif in notifs) {
+								try {
+									if (version != notif.latestPublishedVersion) {
+										slackChannelNotifications.update(
+											Partial(
+												SlackChannelNotification::latestPublishedVersion to version
+											)
+										) {
+											SlackChannelNotification::_id eq notif._id
+										}
+										sendSlackMessage(notif.slackChannel, "Released `${version}` of `${notif.project}`")
+									}
+								} catch (e: Throwable) {
+									e.printStackTrace()
 								}
-								sendSlackMessage(notif.slackChannel, "Released `${version}` of `${notif.project}`")
 							}
+						} catch (e: Throwable) {
+							e.printStackTrace()
 						}
 
 					}
