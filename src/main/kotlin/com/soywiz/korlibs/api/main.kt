@@ -136,29 +136,35 @@ fun main() {
 			}
 			launch {
 				while (true) {
-					for ((project, notifs) in slackChannelNotifications.findAll().groupBy { it.project }) {
-						try {
-							val version = getLibraryVersion(project)
-							for (notif in notifs) {
-								try {
-									if (version != notif.latestPublishedVersion) {
-										slackChannelNotifications.update(
-											Partial(
-												SlackChannelNotification::latestPublishedVersion to version
-											)
-										) {
-											SlackChannelNotification::_id eq notif._id
+					try {
+						println("Started 60-min notifier")
+						for ((project, notifs) in slackChannelNotifications.findAll().groupBy { it.project }) {
+							try {
+								val version = getLibraryVersion(project)
+								for (notif in notifs) {
+									try {
+										if (version != notif.latestPublishedVersion) {
+											val msg = "Released `${version}` of `${notif.project}`"
+											println("msg: $msg")
+											slackChannelNotifications.update(
+												Partial(
+													SlackChannelNotification::latestPublishedVersion to version
+												)
+											) {
+												SlackChannelNotification::_id eq notif._id
+											}
+											sendSlackMessage(notif.slackChannel, msg)
 										}
-										sendSlackMessage(notif.slackChannel, "Released `${version}` of `${notif.project}`")
+									} catch (e: Throwable) {
+										e.printStackTrace()
 									}
-								} catch (e: Throwable) {
-									e.printStackTrace()
 								}
+							} catch (e: Throwable) {
+								e.printStackTrace()
 							}
-						} catch (e: Throwable) {
-							e.printStackTrace()
 						}
-
+					} catch (e: Throwable) {
+						e.printStackTrace()
 					}
 					delay(60.minutes.toJavaDuration())
 				}
