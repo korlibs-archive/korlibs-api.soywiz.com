@@ -80,6 +80,43 @@ fun main() {
 
 		//sendSlackMessage("GTVP6G9GE", "HELLO WORLD!")
 
+		launch(Dispatchers.Unconfined) {
+			while (true) {
+				try {
+					println("Started 60-min notifier")
+					for ((project, notifs) in slackChannelNotifications.findAll().groupBy { it.project }) {
+						try {
+							val version = getLibraryVersion(project)
+							println("  - Checking $project...$version")
+							for (notif in notifs) {
+								try {
+									if (version != notif.latestPublishedVersion) {
+										val msg = "Released `${version}` of `${notif.project}`"
+										println("     - $msg")
+										slackChannelNotifications.update(
+											Partial(
+												SlackChannelNotification::latestPublishedVersion to version
+											)
+										) {
+											SlackChannelNotification::_id eq notif._id
+										}
+										sendSlackMessage(notif.slackChannel, msg)
+									}
+								} catch (e: Throwable) {
+									e.printStackTrace()
+								}
+							}
+						} catch (e: Throwable) {
+							e.printStackTrace()
+						}
+					}
+				} catch (e: Throwable) {
+					e.printStackTrace()
+				}
+				delay(60.minutes.toJavaDuration())
+			}
+		}
+
 		embeddedServer(Netty, port = PORT) {
 			install(DefaultHeaders)
 			install(CallLogging)
@@ -132,42 +169,6 @@ fun main() {
 						}
 					}
 					call.respond(response)
-				}
-			}
-			launch {
-				while (true) {
-					try {
-						println("Started 60-min notifier")
-						for ((project, notifs) in slackChannelNotifications.findAll().groupBy { it.project }) {
-							try {
-								val version = getLibraryVersion(project)
-								println("  - Checking $project...$version")
-								for (notif in notifs) {
-									try {
-										if (version != notif.latestPublishedVersion) {
-											val msg = "Released `${version}` of `${notif.project}`"
-											println("     - $msg")
-											slackChannelNotifications.update(
-												Partial(
-													SlackChannelNotification::latestPublishedVersion to version
-												)
-											) {
-												SlackChannelNotification::_id eq notif._id
-											}
-											sendSlackMessage(notif.slackChannel, msg)
-										}
-									} catch (e: Throwable) {
-										e.printStackTrace()
-									}
-								}
-							} catch (e: Throwable) {
-								e.printStackTrace()
-							}
-						}
-					} catch (e: Throwable) {
-						e.printStackTrace()
-					}
-					delay(60.minutes.toJavaDuration())
 				}
 			}
 		}.start(wait = true)
