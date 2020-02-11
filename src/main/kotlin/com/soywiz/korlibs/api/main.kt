@@ -93,6 +93,8 @@ fun main() {
 									if (version != notif.latestPublishedVersion) {
 										val msg = "Released `${version}` of `${notif.project}`"
 										println("     - $msg")
+										slackChannelNotifications.upsert(notif.copy(latestPublishedVersion = version))
+										/*
 										slackChannelNotifications.update(
 											Partial(
 												SlackChannelNotification::latestPublishedVersion to version
@@ -100,6 +102,7 @@ fun main() {
 										) {
 											SlackChannelNotification::_id eq notif._id
 										}
+										*/
 										sendSlackMessage(notif.slackChannel, msg)
 									}
 								} catch (e: Throwable) {
