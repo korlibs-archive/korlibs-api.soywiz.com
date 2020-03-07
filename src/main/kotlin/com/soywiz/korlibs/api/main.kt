@@ -107,6 +107,7 @@ fun main() {
 										}
 										*/
 										sendSlackMessage(notif.slackChannel, "${notif.slackChannel}: $msg")
+										delay(1.seconds.toJavaDuration())
 									}
 								} catch (e: Throwable) {
 									e.printStackTrace()
