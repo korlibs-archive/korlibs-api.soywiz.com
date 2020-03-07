@@ -2,3 +2,6 @@
 /.idea
 /build
 /data/*.db
+.DS_Store
+/*.mv.db
+/*.trace.db

@@ -33,17 +33,20 @@ val SLACK_VERIFICATION_TOKEN by lazy { System.getenv("SLACK_VERIFICATION_TOKEN")
 data class ProjectVersion(
 	@DbUnique
 	val project: String,
-	val version: String
-) : DbModel.Base<ProjectVersion>()
+	val version: String,
+	override val _id: DbRef<ProjectVersion> = DbRef()
+) : DbModel
 
 data class SlackChannelNotification(
 	@DbUnique("project_channel")
 	val project: String,
 	@DbUnique("project_channel")
 	val slackChannel: String,
-	val latestPublishedVersion: String
-) : DbModel.Base<ProjectVersion>()
+	val latestPublishedVersion: String,
+	override val _id: DbRef<SlackChannelNotification> = DbRef()
+) : DbModel
 
+@OptIn(ExperimentalTime::class)
 fun main() {
 	val localDir = File(".").absoluteFile
 	val dataDir = File("$localDir/data").also { it.mkdirs() }
@@ -103,7 +106,7 @@ fun main() {
 											SlackChannelNotification::_id eq notif._id
 										}
 										*/
-										sendSlackMessage(notif.slackChannel, msg)
+										sendSlackMessage(notif.slackChannel, "${notif.slackChannel}: $msg")
 									}
 								} catch (e: Throwable) {
 									e.printStackTrace()
