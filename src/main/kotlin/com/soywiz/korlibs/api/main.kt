@@ -17,6 +17,7 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.time.*
 import java.io.*
 import kotlin.time.*
@@ -54,6 +55,8 @@ fun main() {
 	val h2DataFile = File("$dataDir/data.db")
 	println("DB: $h2DataFile")
 	val db = JdbcDb("jdbc:h2:$h2DataFile", "", "")
+
+	val triggerRecheck = Channel<Unit>()
 
 	runBlocking {
 		val projectVersions = db.table<ProjectVersion>()
@@ -121,7 +124,16 @@ fun main() {
 				} catch (e: Throwable) {
 					e.printStackTrace()
 				}
-				delay(60.minutes.toJavaDuration())
+				try {
+					withTimeout(60.minutes) {
+						triggerRecheck.receive()
+					}
+				} catch (e: TimeoutCancellationException) {
+					Unit
+				} catch (e: Throwable) {
+					e.printStackTrace()
+				}
+				//delay(60.minutes.toJavaDuration())
 			}
 		}
 
@@ -157,6 +169,10 @@ fun main() {
 					val channelId = params["channel_id"] ?: ""
 					val channelName = params["channel_name"] ?: ""
 					val response = when (command) {
+						"/recheck" -> {
+							triggerRecheck.send(Unit)
+							"Triggered recheck"
+						}
 						"/list_registrations" -> {
 							val projectNames = slackChannelNotifications.where { (it::slackChannel eq channelId) }.find().map { it.project }
 							"Registered to $projectNames in '$channelName'"
