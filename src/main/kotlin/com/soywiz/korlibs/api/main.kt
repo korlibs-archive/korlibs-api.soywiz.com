@@ -158,10 +158,7 @@ fun main() {
 					val channelName = params["channel_name"] ?: ""
 					val response = when (command) {
 						"/list_registrations" -> {
-							val projectId = text.trim()
-							val version = getLibraryVersion(projectId)
 							val projectNames = slackChannelNotifications.where { (it::slackChannel eq channelId) }.find().map { it.project }
-							slackChannelNotifications.upsert(SlackChannelNotification(projectId, channelId, version))
 							"Registered to $projectNames in '$channelName'"
 						}
 						"/register_bintray" -> {
