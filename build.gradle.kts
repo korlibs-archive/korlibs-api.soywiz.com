@@ -1,7 +1,7 @@
 import org.gradle.kotlin.dsl.*
 
 plugins {
-	kotlin("jvm") version "1.3.70"
+	kotlin("jvm") version "1.3.72"
 	application
 }
 group = "com.soywiz.korlibs-api"
@@ -27,8 +27,8 @@ dependencies {
 	implementation("io.ktor:ktor-client-jackson:1.3.0")
 	//implementation('com.soywiz.korlibs.korio:korio-jvm:1.9.8')
 	implementation("com.soywiz.korlibs.klock:klock-jvm:1.8.7")
-	implementation("com.soywiz.kminiorm:kminiorm:0.5.0")
-	implementation("com.soywiz.kminiorm:kminiorm-jdbc:0.5.0")
+	implementation("com.soywiz.kminiorm:kminiorm:0.8.3")
+	implementation("com.soywiz.kminiorm:kminiorm-jdbc:0.8.3")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.2")
 	implementation("org.yaml:snakeyaml:1.25")
 	implementation("com.h2database:h2:1.4.199")
@@ -66,7 +66,7 @@ tasks {
 	//val run by creating(JavaExec::class) {}
 
 	val jarFile = fatJar.outputs.files.first()
-	val server = "soywiz"
+	val server = "soywiz2"
 	val baseDir = "/home/virtual/korlibs/korlibs-api.soywiz.com"
 	val baseOut = "$server:$baseDir"
 

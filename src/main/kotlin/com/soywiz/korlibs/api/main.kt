@@ -3,6 +3,7 @@
 package com.soywiz.korlibs.api
 
 import com.soywiz.kminiorm.*
+import com.soywiz.kminiorm.where.*
 import com.soywiz.korlibs.api.util.*
 import io.ktor.application.*
 import io.ktor.client.*
@@ -156,11 +157,26 @@ fun main() {
 					val channelId = params["channel_id"] ?: ""
 					val channelName = params["channel_name"] ?: ""
 					val response = when (command) {
+						"/list_registrations" -> {
+							val projectId = text.trim()
+							val version = getLibraryVersion(projectId)
+							val projectNames = slackChannelNotifications.where { (it::slackChannel eq channelId) }.find().map { it.project }
+							slackChannelNotifications.upsert(SlackChannelNotification(projectId, channelId, version))
+							"Registered to $projectNames in '$channelName'"
+						}
 						"/register_bintray" -> {
 							val projectId = text.trim()
 							val version = getLibraryVersion(projectId)
 							slackChannelNotifications.upsert(SlackChannelNotification(projectId, channelId, version))
 							"Registered to '$projectId' (current version '$version') in '$channelName'"
+						}
+						"/unregister_bintray" -> {
+							val projectId = text.trim()
+							val version = getLibraryVersion(projectId)
+							slackChannelNotifications
+								.where { (it::project eq projectId) AND (it::slackChannel eq channelId) AND (it::latestPublishedVersion eq version) }
+								.delete()
+							"Unregistered from '$projectId' (current version '$version') in '$channelName'"
 						}
 						"/send_test_message" -> {
 							//sendSlackMessage("GTVP6G9GE", "HELLO WORLD!")
