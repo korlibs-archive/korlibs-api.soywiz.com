@@ -2,12 +2,18 @@
 
 package com.soywiz.korlibs.api
 
+import com.gitlab.kordlib.core.Kord
+import com.gitlab.kordlib.core.entity.ReactionEmoji
+import com.gitlab.kordlib.core.event.message.MessageCreateEvent
+import com.gitlab.kordlib.core.on
 import com.soywiz.kminiorm.*
 import com.soywiz.kminiorm.where.*
 import com.soywiz.korlibs.api.util.*
 import io.ktor.application.*
 import io.ktor.client.*
+import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
+import io.ktor.client.features.websocket.*
 import io.ktor.client.request.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -49,7 +55,26 @@ data class SlackChannelNotification(
 ) : DbModel
 
 @OptIn(ExperimentalTime::class)
-fun main() {
+suspend fun main() {
+	/*
+	val client = Kord("---")
+	val pingPong = ReactionEmoji.Unicode("\uD83C\uDFD3")
+
+	client.on<MessageCreateEvent> {
+		if (message.content != "!ping") return@on
+
+		val response = message.channel.createMessage("Pong!")
+		response.addReaction(pingPong)
+
+		kotlinx.coroutines.delay(5000L)
+		message.delete()
+		response.delete()
+	}
+
+	client.login()
+
+	return
+	 */
 	val localDir = File(".").absoluteFile
 	val dataDir = File("$localDir/data").also { it.mkdirs() }
 	val h2DataFile = File("$dataDir/data.db")

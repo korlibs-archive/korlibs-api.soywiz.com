@@ -15,6 +15,7 @@ services:
     command: java -server -XX:+UnlockExperimentalVMOptions -XX:InitialRAMFraction=2 -XX:MinRAMFraction=2 -XX:MaxRAMFraction=2 -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication -jar /app/app.jar
 
     environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
       SLACK_TOKEN: "${SLACK_TOKEN}"
       SLACK_VERIFICATION_TOKEN: "${SLACK_VERIFICATION_TOKEN}"
       KTOR_ENV: PROD
