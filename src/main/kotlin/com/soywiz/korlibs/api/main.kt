@@ -16,20 +16,26 @@ import kotlinx.coroutines.*
 suspend fun main() {
 	val injector = AsyncInjector().jvmAutomapping()
 
-	injector.mapSingleton {
-		HttpClient {
-			install(JsonFeature) {
-				serializer = JacksonSerializer()
+	val routes = listOf(
+		VersionsRoute::class,
+		SlackCommandsRoute::class,
+	)
+
+	val bots = listOf(
+		DiscordRoleUpdaterBot::class,
+		SlackNotifier::class,
+	)
+
+	embeddedServer(Netty, port = injector.getSync<AppConfig>().PORT) {
+		injector.mapInstance<Application>(this)
+		injector.mapSingleton {
+			HttpClient {
+				install(JsonFeature) {
+					serializer = JacksonSerializer()
+				}
 			}
 		}
-	}
 
-	val config = injector.getSync<AppConfig>()
-
-	println("Listening to PORT=${config.PORT}")
-
-	embeddedServer(Netty, port = config.PORT) {
-		injector.mapInstance<Application>(this)
 		install(DefaultHeaders)
 		install(CallLogging)
 		install(CORS) {
@@ -42,13 +48,12 @@ suspend fun main() {
 			anyHost()
 			allowCredentials = true
 		}
-		injector.getSync<VersionsRoute>().register()
-		injector.getSync<SlackCommandsRoute>().register()
+		for (clazz in routes) {
+			injector.getSync(clazz).register(this)
+		}
 		launch {
-			for (bot in listOf(
-				injector.get<DiscordRoleUpdaterBot>(),
-				injector.get<SlackNotifier>(),
-			)) {
+			for (clazz in bots) {
+				val bot = injector.get(clazz)
 				println("Starting BOT... $bot")
 				launch {
 					bot.run()

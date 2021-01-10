@@ -11,14 +11,12 @@ import io.ktor.routing.*
 class VersionsRoute(
 	private val application: Application,
 	private val bintray: Bintray,
-) {
-	fun register() {
-		application.routing {
-			get("/versions/{id}") {
-				val id = context.parameters["id"] ?: ""
-				val version = bintray.getLibraryVersion(id)
-				call.respond(mapOf("project" to id, "version" to version).toJson())
-			}
+) : Route {
+	override suspend fun Routing.register() {
+		get("/versions/{id}") {
+			val id = context.parameters["id"] ?: ""
+			val version = bintray.getLibraryVersion(id)
+			call.respond(mapOf("project" to id, "version" to version).toJson())
 		}
 	}
 }
