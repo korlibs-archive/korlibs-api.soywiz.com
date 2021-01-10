@@ -11,10 +11,19 @@ repositories {
 	mavenLocal()
 	mavenCentral()
 	jcenter()
+	maven {
+		url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+	}
 }
 
 dependencies {
-	implementation("com.gitlab.kordlib.kord:kord-core:0.6.10")
+	//val ktor_version = "1.5.0"
+	val ktor_version = "1.4.1"
+
+	//implementation("com.gitlab.kordlib.kord:kord-core:0.6.10")
+	implementation("com.soywiz.korlibs.korinject:korinject:2.0.2")
+	implementation("com.soywiz.korlibs.korio:korio-jvm:2.0.2")
+	implementation("dev.kord:kord-core:0.7.0-SNAPSHOT")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	//implementation("mysql:mysql-connector-java:8.0.19")
@@ -22,7 +31,6 @@ dependencies {
 	//implementation('io.vertx:vertx-web:3.8.5')
 	//implementation('io.vertx:vertx-lang-kotlin:3.8.5')
 	//implementation('io.vertx:vertx-lang-kotlin-coroutines:3.8.5')
-	val ktor_version =  "1.5.0"
 	implementation("com.hubspot.slack:slack-client:1.6")
 	implementation("io.ktor:ktor-server-netty:$ktor_version")
 	implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
@@ -30,7 +38,6 @@ dependencies {
 	implementation("io.ktor:ktor-client-cio:$ktor_version")
 	implementation("io.ktor:ktor-client-jackson:$ktor_version")
 	implementation("io.ktor:ktor-client-websockets:$ktor_version")
-	//implementation('com.soywiz.korlibs.korio:korio-jvm:1.9.8')
 	implementation("com.soywiz.korlibs.klock:klock-jvm:1.8.7")
 	implementation("com.soywiz.kminiorm:kminiorm:0.8.3")
 	implementation("com.soywiz.kminiorm:kminiorm-jdbc:0.8.3")

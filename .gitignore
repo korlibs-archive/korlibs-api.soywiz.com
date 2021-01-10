@@ -5,3 +5,4 @@
 .DS_Store
 /*.mv.db
 /*.trace.db
+/.env
