@@ -1,5 +1,6 @@
 package com.soywiz.korlibs.api
 
+import com.soywiz.kminiorm.*
 import com.soywiz.korinject.*
 import com.soywiz.korlibs.api.bot.*
 import com.soywiz.korlibs.api.model.*
@@ -26,7 +27,11 @@ suspend fun main() {
 		SlackNotifier::class,
 	)
 
-	embeddedServer(Netty, port = injector.getSync<AppConfig>().PORT) {
+	val config = injector.getSync<AppConfig>()
+	println("DB: ${config.h2DataFile}")
+	injector.mapInstance(JdbcDb("jdbc:h2:${config.h2DataFile}", "", ""))
+
+	embeddedServer(Netty, port = config.PORT) {
 		injector.mapInstance<Application>(this)
 		injector.mapSingleton {
 			HttpClient {

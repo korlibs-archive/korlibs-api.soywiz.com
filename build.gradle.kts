@@ -47,6 +47,7 @@ dependencies {
 	testImplementation("junit:junit:4.13")
 	testImplementation("org.jetbrains.kotlin:kotlin-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+	testImplementation("io.mockk:mockk:1.10.4")
 
 	implementation("ch.qos.logback:logback-classic:1.2.3")
 
