@@ -9,4 +9,6 @@ object Environment {
 	operator fun get(key: String): String? {
 		return System.getenv(key) ?: envProperties?.get(key)?.toString()
 	}
+
+	fun getSure(key: String): String = get(key) ?: error("Can't get environment $key")
 }
