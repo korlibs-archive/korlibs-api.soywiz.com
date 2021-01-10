@@ -124,6 +124,6 @@ class GithubTest {
 				description = "desc2",
 				monthlyPriceInDollars = 10
 			)
-		), github.getTierInfo("demo"))
+		), github.getTiersInfo("demo"))
 	}
 }

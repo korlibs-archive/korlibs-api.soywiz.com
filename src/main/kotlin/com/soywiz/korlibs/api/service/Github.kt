@@ -59,7 +59,7 @@ open class Github(
 		return jsonMapper.readValue<Map<String, Any?>>(graphqlCallString(access_token, query))
 	}
 
-	object Dynamic {
+	private object Dynamic {
 		inline operator fun <T> invoke(block: Dynamic.() -> T): T = block()
 
 		fun Any?.keys(): List<Any?> = when (this) {
@@ -99,7 +99,7 @@ open class Github(
 
 	data class TierInfo(val id: String, val name: String, val description: String, val monthlyPriceInDollars: Int)
 
-	suspend fun getTierInfo(login: String, access_token: String = config.GH_SPONSOR_TOKEN): List<TierInfo> {
+	suspend fun getTiersInfo(login: String, access_token: String = config.GH_SPONSOR_TOKEN): List<TierInfo> {
 		val data = graphqlCall(
 			access_token, """
 				query {

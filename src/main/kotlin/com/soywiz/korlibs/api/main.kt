@@ -5,6 +5,7 @@ import com.soywiz.korinject.*
 import com.soywiz.korlibs.api.bot.*
 import com.soywiz.korlibs.api.model.*
 import com.soywiz.korlibs.api.route.*
+import com.soywiz.korlibs.api.service.*
 import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.features.json.*
@@ -29,7 +30,7 @@ suspend fun main() {
 
 	val config = injector.getSync<AppConfig>()
 	println("DB: ${config.h2DataFile}")
-	injector.mapInstance(JdbcDb("jdbc:h2:${config.h2DataFile}", "", ""))
+	injector.mapInstance<Db>(JdbcDb("jdbc:h2:${config.h2DataFile}", "", ""))
 
 	embeddedServer(Netty, port = config.PORT) {
 		injector.mapInstance<Application>(this)
@@ -56,6 +57,12 @@ suspend fun main() {
 		for (clazz in routes) {
 			injector.getSync(clazz).register(this)
 		}
+		//runBlocking {
+		//	println("TIERS:")
+		//	for (tier in injector.get<Github>().getTiersInfo("soywiz")) {
+		//		println("tier: $tier")
+		//	}
+		//}
 		launch {
 			for (clazz in bots) {
 				val bot = injector.get(clazz)

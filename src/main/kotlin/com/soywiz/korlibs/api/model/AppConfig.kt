@@ -9,7 +9,7 @@ class AppConfig {
 	val PORT = Environment["PORT"]?.toIntOrNull() ?: 8080
 	val SLACK_TOKEN = Environment["SLACK_TOKEN"]
 	val SLACK_VERIFICATION_TOKEN = Environment["SLACK_VERIFICATION_TOKEN"]
-	val DISCORD_TOKEN = Environment["DISCORD_TOKEN"]
+	val DISCORD_TOKEN get() = Environment.getSure("DISCORD_TOKEN")
 	val DISCORD_GUILD_ID = 728582275884908604L
 	val localDir = File(".").absoluteFile
 	val dataDir = File("$localDir/data").also { it.mkdirs() }
